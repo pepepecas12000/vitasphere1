@@ -37,7 +37,7 @@ class MongoDatabase {
 
   /// **Registrar un nuevo usuario en MongoDB**
   static Future<bool> registrarUsuario(
-      String nombre, String apellidos, String telefono, String email, String password, String fecha) async {
+      String nombre, String apellidos, String telefono, String email, String password, String fecha, String sexo) async {
     try {
       print("📝 Intentando registrar usuario con email: $email");
 
@@ -57,6 +57,7 @@ class MongoDatabase {
         "apellidos": apellidos.trim(),
         "telefono": telefono.trim(),
         "email": email.trim(),
+        "sexo": sexo.trim(),
         "password": hashedPassword, // Contraseña encriptada
         "confpassword": hashedPassword, // Para validación extra si es necesario
         "fecha": fecha.trim(),

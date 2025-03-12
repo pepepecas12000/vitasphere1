@@ -1,6 +1,9 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:mongo_dart/mongo_dart.dart' show ObjectId;
 import '../db/database.dart';
+
 
 class Registrar extends StatefulWidget {
   const Registrar({super.key});
@@ -18,6 +21,9 @@ class _RegistrarState extends State<Registrar> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController fechaController = TextEditingController();
   bool _isLoading = false;
+  final List<String> _genero = ['Masculino', 'Femenino', 'Otro', 'Prefiero no decirlo'];
+  String? _genSelected;
+
 
   Future<void> insertarUsuario() async {
     if (_formKey.currentState!.validate()) {
@@ -58,6 +64,7 @@ class _RegistrarState extends State<Registrar> {
           "apellidos": apellidosController.text.trim(),
           "telefono": telefonoController.text.trim(),
           "email": emailController.text.trim(),
+          "sexo": _genSelected,
           "password": hashedPassword, // Contraseña encriptada
           "confpassword": hashedPassword, // También en la confirmación si es necesario
           "fecha": fechaController.text.trim(),
@@ -109,8 +116,22 @@ class _RegistrarState extends State<Registrar> {
               _buildTextField("Email", emailController, isEmail: true),
               _buildTextField("Contraseña", passwordController, obscureText: true),
               _buildTextField("Fecha de Nacimiento (YYYY-MM-DD)", fechaController),
+              DropdownButton<String>(
+                hint: Text("Seleccione su genero"),
+                value: _genSelected,
+                items: _genero.map((opcion) {
+                  return DropdownMenuItem<String>(
+                    value: opcion,
+                    child: Text(opcion),
+                  );
+                }).toList(),
+                onChanged: (String? newOpt){
+                  setState(() {
+                    _genSelected = newOpt;
+                  });
+                }
+              ),
               const SizedBox(height: 20),
-
               ElevatedButton(
                 onPressed: _isLoading ? null : insertarUsuario,
                 style: ElevatedButton.styleFrom(
