@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:vitasphere1/widgets/iniciar.dart';
 
 import 'home.dart';
  class App extends StatelessWidget {
-   const App({super.key});
+   final String? userEmail;
+   const App({super.key, this.userEmail});
 
    @override
    Widget build(BuildContext context) {
@@ -11,7 +13,7 @@ import 'home.dart';
        title: "VitaSphere",
        //theme: ThemeData(fontFamily: "outfit", primarySwatch: Colors.lightBlue),
        initialRoute: "home",
-       routes: {"home": (BuildContext context)=> const Home()},
+       home: userEmail != null ? Home() : Iniciar(),
      );
    }
  }

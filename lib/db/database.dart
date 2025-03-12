@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:mongo_dart/mongo_dart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MongoDatabase {
   static late Db db;
@@ -102,6 +103,8 @@ class MongoDatabase {
       // Comparar con la base de datos
       if (hashedPassword == storedPassword || hashedPassword == storedConfPassword) {
         print("✅ Inicio de sesión exitoso para: ${user['email']}");
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("user_email", email);
         return true;
       } else {
         print("❌ Contraseña incorrecta.");
@@ -111,5 +114,16 @@ class MongoDatabase {
       print("❌ Error inesperado al verificar usuario: $e");
       return false;
     }
+  }
+
+  static Future<void> cerrarSesion() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove("user_email");
+  }
+
+  static Future<String?> obtenerUsuarioAct() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString("user_email");
+
   }
 }

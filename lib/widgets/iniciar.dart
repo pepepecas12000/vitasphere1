@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:vitasphere1/widgets/home.dart';
+import 'package:vitasphere1/widgets/registrar.dart';
 import '../db/database.dart';
 
 class Iniciar extends StatefulWidget {
@@ -18,13 +20,13 @@ class _IniciarState extends State<Iniciar> {
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () async {
-      await MongoDatabase.connect(); // Evita bloqueos en la UI
+      await MongoDatabase.connect();
     });
   }
 
   Future<void> iniciarSesion() async {
     if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true); // Inicia el indicador de carga
+      setState(() => _isLoading = true); //
 
       String email = emailController.text.trim();
       String password = passwordController.text.trim();
@@ -45,7 +47,7 @@ class _IniciarState extends State<Iniciar> {
       );
 
       if (esValido) {
-        Navigator.pushReplacementNamed(context, "/home");
+        Navigator.push(context, MaterialPageRoute(builder: (context) => Home(),));
       }
     }
   }
@@ -94,7 +96,7 @@ class _IniciarState extends State<Iniciar> {
                 const SizedBox(height: 20),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, "/register"); // Ir a registro
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => Registrar(),)); // Ir a registro
                   },
                   child: const Text(
                     "¿No tienes cuenta? Regístrate aquí",
