@@ -103,72 +103,76 @@ class _RegistrarState extends State<Registrar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Registro de Usuario")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              _buildTextField("Nombre", nombreController),
-              _buildTextField("Apellidos", apellidosController),
-              _buildTextField("Teléfono", telefonoController, isPhone: true),
-              _buildTextField("Email", emailController, isEmail: true),
-              _buildTextField("Contraseña", passwordController, obscureText: true),
-              _buildTextField("Fecha de Nacimiento (YYYY-MM-DD)", fechaController),
-              DropdownButton<String>(
-                hint: Text("Seleccione su genero"),
-                value: _genSelected,
-                items: _genero.map((opcion) {
-                  return DropdownMenuItem<String>(
-                    value: opcion,
-                    child: Text(opcion),
-                  );
-                }).toList(),
-                onChanged: (String? newOpt){
-                  setState(() {
-                    _genSelected = newOpt;
-                  });
-                }
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _isLoading ? null : insertarUsuario,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30.0),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Regístrate",
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                  "Registrar",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                  const SizedBox(height: 20),
+                  _buildTextField("Nombre", nombreController),
+                  const SizedBox(height: 10),
+                  _buildTextField("Apellidos", apellidosController),
+                  const SizedBox(height: 10),
+                  _buildTextField("Teléfono", telefonoController, isPhone: true),
+                  const SizedBox(height: 10),
+                  _buildTextField("Correo electrónico", emailController, isEmail: true),
+                  const SizedBox(height: 10),
+                  _buildTextField("Contraseña", passwordController, obscureText: true),
+                  const SizedBox(height: 10),
+                  _buildTextField("Fecha de Nacimiento (YYYY-MM-DD)", fechaController),
+                  const SizedBox(height: 10),
+                  DropdownButtonFormField<String>(
+                    decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    hint: const Text("Seleccione su género"),
+                    value: _genSelected,
+                    items: _genero.map((opcion) => DropdownMenuItem(value: opcion, child: Text(opcion))).toList(),
+                    onChanged: (String? newOpt) {
+                      setState(() => _genSelected = newOpt);
+                    },
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : insertarUsuario,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                        "Registrar",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller,
-      {bool obscureText = false, bool isEmail = false, bool isPhone = false}) {
+  Widget _buildTextField(String label, TextEditingController controller, {bool obscureText = false, bool isEmail = false, bool isPhone = false}) {
     return TextFormField(
       controller: controller,
       obscureText: obscureText,
-      keyboardType: isEmail
-          ? TextInputType.emailAddress
-          : isPhone
-          ? TextInputType.phone
-          : TextInputType.text,
+      keyboardType: isEmail ? TextInputType.emailAddress : isPhone ? TextInputType.phone : TextInputType.text,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(

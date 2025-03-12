@@ -21,41 +21,7 @@ class _HomeState extends State<Home> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text("VitaSphere"),
-          Text("Tecnología que salva vidas, al instante"),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Registrar(),
-                        ));
-                  },
-                  child: Text("Regsitrarse")),
-              ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Iniciar(),
-                        ));
-                  },
-                  child: Text("Iniciar Seccion")),
-              ElevatedButton(
-                  onPressed: () async {
-                    await MongoDatabase.cerrarSesion();
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Iniciar(),
-                        ));
-                  },
-                  child: Text("Cerrar sesion"))
-            ],
-          )
+          Text("Alerta inteligente, cuidado inmediato"),
         ],
       ),
     ));
