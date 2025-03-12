@@ -12,6 +12,19 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+  @override
+  void initState() {
+    super.initState();
+    redirect();
+  }
+
+  void redirect(){
+    Future.delayed(Duration(seconds: 5),() {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Iniciar(),));
+    },);
+
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

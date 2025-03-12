@@ -19,7 +19,7 @@ class _RegistrarState extends State<Registrar> {
   final TextEditingController telefonoController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController fechaController = TextEditingController();
+  final  fechaController = TextEditingController();
   bool _isLoading = false;
   final List<String> _genero = ['Masculino', 'Femenino', 'Otro', 'Prefiero no decirlo'];
   String? _genSelected;
