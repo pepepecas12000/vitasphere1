@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:vitasphere1/widgets/home.dart';
+import 'package:vitasphere1/widgets/registrar.dart';
 import '../db/database.dart';
 
 class Iniciar extends StatefulWidget {
@@ -18,13 +20,13 @@ class _IniciarState extends State<Iniciar> {
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () async {
-      await MongoDatabase.connect(); // Evita bloqueos en la UI
+      await MongoDatabase.connect();
     });
   }
 
   Future<void> iniciarSesion() async {
     if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true); // Inicia el indicador de carga
+      setState(() => _isLoading = true); //
 
       String email = emailController.text.trim();
       String password = passwordController.text.trim();
@@ -45,7 +47,7 @@ class _IniciarState extends State<Iniciar> {
       );
 
       if (esValido) {
-        Navigator.pushReplacementNamed(context, "/home");
+        Navigator.push(context, MaterialPageRoute(builder: (context) => Home(),));
       }
     }
   }
@@ -53,55 +55,76 @@ class _IniciarState extends State<Iniciar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1E),
+      backgroundColor: Colors.white,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildTextField("Correo", emailController, isEmail: true),
-                const SizedBox(height: 15),
-                _buildTextField("Contraseña", passwordController, obscureText: true),
-                const SizedBox(height: 30),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : iniciarSesion,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Hola de nuevo!",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                      "Entrar",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    "Inicie sesión para acceder a su cuenta",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildTextField("Correo electrónico", emailController, isEmail: true),
+                  const SizedBox(height: 15),
+                  _buildTextField("Contraseña", passwordController, obscureText: true),
+                  const SizedBox(height: 30),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : iniciarSesion,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                        "Iniciar sesión",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
-                ),
-
-                const SizedBox(height: 20),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/register"); // Ir a registro
-                  },
-                  child: const Text(
-                    "¿No tienes cuenta? Regístrate aquí",
-                    style: TextStyle(color: Colors.blueAccent),
+                  const SizedBox(height: 20),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text(
+                      "¿Olvidaste tu contraseña?",
+                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
-              ],
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Registrar(),));
+                    },
+                    child: const Text(
+                      "¿No tienes una cuenta aún?",
+                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -115,16 +138,9 @@ class _IniciarState extends State<Iniciar> {
       controller: controller,
       obscureText: obscureText,
       keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
-      style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.cyan, width: 2),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.cyanAccent, width: 2.5),
+        border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
       ),
