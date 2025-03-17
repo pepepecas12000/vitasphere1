@@ -13,7 +13,7 @@ import 'home.dart';
        title: "VitaSphere",
        //theme: ThemeData(fontFamily: "outfit", primarySwatch: Colors.lightBlue),
        initialRoute: "home",
-       home: userEmail != null ? Home() : Iniciar(),
+       home: Home()
      );
    }
  }
