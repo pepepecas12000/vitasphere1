@@ -11,7 +11,7 @@ class MongoDatabase {
   static const MONGO_URL =
       "mongodb+srv://arturo2005sidas:Sidas-200@vitasphere.nvtg2.mongodb.net/VitaSphere?retryWrites=true&w=majority";
   static const COLLECTION_NAME = "Users";
-  static const String SECRET_KEY = "vitasphere";
+  static const String SECRET_KEY = "vita";
 
   static Future<void> connect() async {
     if (isConnected) return;
@@ -96,18 +96,19 @@ class MongoDatabase {
 
       // Extraer contraseñas almacenadas en la base de datos
       String storedPassword = user["password"];
-      String storedConfPassword = user["confpassword"];
 
       // Encriptar la contraseña ingresada para compararla
       String hashedPassword = encriptarPassword(password);
 
       // Comparar con la base de datos
-      if (hashedPassword == storedPassword || hashedPassword == storedConfPassword) {
+      if (hashedPassword == storedPassword) {
         print("✅ Inicio de sesión exitoso para: ${user['email']}");
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString("user_email", email);
         return true;
       } else {
+        print(storedPassword);
+        print(hashedPassword);
         print("❌ Contraseña incorrecta.");
         return false;
       }
