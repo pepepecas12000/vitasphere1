@@ -38,6 +38,8 @@ dependencies:
   crypto: ^3.0.6
   pointycastle: ^4.0.0
   shared_preferences: ^2.5.2
+  flutter_blue_plus: ^1.35.3
+  google_fonts: ^6.2.1
 
 
 dev_dependencies:

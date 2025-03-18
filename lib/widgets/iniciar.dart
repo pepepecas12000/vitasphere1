@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:vitasphere1/widgets/home.dart';
 import 'package:vitasphere1/widgets/registrar.dart';
 import '../db/database.dart';
+import 'package:vitasphere1/screens/pair.dart';
 
 class Iniciar extends StatefulWidget {
   const Iniciar({super.key});
@@ -47,7 +47,7 @@ class _IniciarState extends State<Iniciar> {
       );
 
       if (esValido) {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => Home(),));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => Pair(),));
       }
     }
   }
@@ -107,13 +107,13 @@ class _IniciarState extends State<Iniciar> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      "¿Olvidaste tu contraseña?",
-                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                  // TextButton(
+                  //   onPressed: () {},
+                  //   child: const Text(
+                  //     "¿Olvidaste tu contraseña?",
+                  //     style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                  //   ),
+                  // ),
                   TextButton(
                     onPressed: () {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => Registrar(),));

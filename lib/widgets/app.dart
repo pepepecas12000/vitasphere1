@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vitasphere1/widgets/iniciar.dart';
 
 import 'home.dart';
  class App extends StatelessWidget {
@@ -11,7 +10,6 @@ import 'home.dart';
      return  MaterialApp(
        debugShowCheckedModeBanner: false,
        title: "VitaSphere",
-       //theme: ThemeData(fontFamily: "outfit", primarySwatch: Colors.lightBlue),
        initialRoute: "home",
        home: Home()
      );

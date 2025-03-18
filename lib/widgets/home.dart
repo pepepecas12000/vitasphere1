@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vitasphere1/db/database.dart';
-import 'package:vitasphere1/widgets/registrar.dart';
 
 import 'iniciar.dart';
 
