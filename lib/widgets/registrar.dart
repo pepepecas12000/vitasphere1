@@ -1,9 +1,10 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mongo_dart/mongo_dart.dart' show ObjectId;
 import '../db/database.dart';
+import 'package:intl/intl.dart';
 
+import 'iniciar.dart';
 
 class Registrar extends StatefulWidget {
   const Registrar({super.key});
@@ -21,32 +22,62 @@ class _RegistrarState extends State<Registrar> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController fechaController = TextEditingController();
   bool _isLoading = false;
+  bool _obscureText = true; // Para controlar la visibilidad de la contraseña
   final List<String> _genero = ['Masculino', 'Femenino', 'Otro', 'Prefiero no decirlo'];
   String? _genSelected;
 
+  @override
+  void initState() {
+    super.initState();
+    // Inicializar el controlador de fecha con formato
+    fechaController.text = '';
+  }
+
+  // Función para mostrar el selector de fecha
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)), // 18 años atrás por defecto
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF3c5148), // Color principal
+              onPrimary: Color(0xFFD5DDDF), // Color del texto sobre el color principal
+              onSurface: Color(0xFF3c5148), // Color del texto en la superficie
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF3c5148), // Color de los botones de texto
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        // Formatear la fecha seleccionada
+        fechaController.text = DateFormat('yyyy-MM-dd').format(picked);
+      });
+    }
+  }
 
   Future<void> insertarUsuario() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
       try {
-        if (MongoDatabase.collection == null) {
-          print("❌ Error: La colección no está inicializada.");
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("❌ No se puede conectar a la base de datos")),
-          );
-          setState(() => _isLoading = false);
-          return;
-        }
-
-        // Verificar si el email ya está registrado
         var existingUser = await MongoDatabase.collection.findOne({
           "email": emailController.text.trim(),
         });
 
         if (existingUser != null) {
-          print("❌ El usuario ya existe.");
+          debugPrint("❌ El usuario ya existe.");
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("❌ El email ya está en uso")),
@@ -74,7 +105,7 @@ class _RegistrarState extends State<Registrar> {
         setState(() => _isLoading = false);
 
         if (result.isSuccess) {
-          print("✅ Usuario insertado con éxito");
+          debugPrint("✅ Usuario insertado con éxito");
 
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
@@ -90,7 +121,7 @@ class _RegistrarState extends State<Registrar> {
           );
         }
       } catch (e) {
-        print("❌ Error al insertar usuario: $e");
+        debugPrint("❌ Error al insertar usuario: $e");
         setState(() => _isLoading = false);
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -103,7 +134,15 @@ class _RegistrarState extends State<Registrar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFD5DDDF),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF3c5148)),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
@@ -113,50 +152,67 @@ class _RegistrarState extends State<Registrar> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    "Regístrate",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  Text(
+                    "Crea una cuenta!",
+                    style: GoogleFonts.quicksand(
+                      fontSize: 42,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF3c5148),
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Regístrate para comenzar",
+                    style: GoogleFonts.roboto(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF1B2727),
+                      letterSpacing: 0.5,
+                    ),
                   ),
                   const SizedBox(height: 20),
-                  _buildTextField("Nombre", nombreController),
+                  _buildTextField("Nombre(s)", nombreController),
                   const SizedBox(height: 10),
-                  _buildTextField("Apellidos", apellidosController),
+                  _buildTextField("Apellido(s)", apellidosController),
                   const SizedBox(height: 10),
-                  _buildTextField("Teléfono", telefonoController, isPhone: true),
+                  _buildDateField(),
+                  const SizedBox(height: 10),
+                  _buildGenderDropdown(),
+                  const SizedBox(height: 10),
+                  _buildTextField("Número de celular", telefonoController, isPhone: true),
                   const SizedBox(height: 10),
                   _buildTextField("Correo electrónico", emailController, isEmail: true),
                   const SizedBox(height: 10),
-                  _buildTextField("Contraseña", passwordController, obscureText: true),
-                  const SizedBox(height: 10),
-                  _buildTextField("Fecha de Nacimiento (YYYY-MM-DD)", fechaController),
-                  const SizedBox(height: 10),
-                  DropdownButtonFormField<String>(
-                    decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
-                    hint: const Text("Seleccione su género"),
-                    value: _genSelected,
-                    items: _genero.map((opcion) => DropdownMenuItem(value: opcion, child: Text(opcion))).toList(),
-                    onChanged: (String? newOpt) {
-                      setState(() => _genSelected = newOpt);
-                    },
-                  ),
+                  _buildPasswordField(),
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : insertarUsuario,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
+                        backgroundColor: const Color(0xFF1B2727),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                       child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
+                          ? const CircularProgressIndicator(color: Color(0xFFD5DDDF))
                           : const Text(
-                        "Registrar",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        "Registrarse",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFD5DDDF)),
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Iniciar(),));
+                    },
+                    child: const Text(
+                      "¿Ya tienes una cuenta?",
+                      style: TextStyle(color: Color(0xFF1B2727), fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -168,15 +224,146 @@ class _RegistrarState extends State<Registrar> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, {bool obscureText = false, bool isEmail = false, bool isPhone = false}) {
+  Widget _buildDateField() {
     return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      keyboardType: isEmail ? TextInputType.emailAddress : isPhone ? TextInputType.phone : TextInputType.text,
+      controller: fechaController,
+      readOnly: true, // Hacer el campo de solo lectura
+      style: GoogleFonts.roboto(
+        color: const Color(0xFF1B2727),
+      ),
+      cursorColor: const Color(0xFF1B2727),
       decoration: InputDecoration(
-        labelText: label,
+        labelText: "Fecha de Nacimiento",
+        labelStyle: GoogleFonts.roboto(
+          color: const Color(0xFF1B2727),
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF1B2727), width: 2),
+        ),
+        suffixIcon: IconButton(
+          icon: const Icon(
+            Icons.calendar_today,
+            color: Color(0xFF3c5148),
+          ),
+          onPressed: () => _selectDate(context),
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Seleccione su fecha de nacimiento";
+        }
+        return null;
+      },
+      onTap: () => _selectDate(context),
+    );
+  }
+
+  Widget _buildGenderDropdown() {
+    return DropdownButtonFormField<String>(
+      decoration: InputDecoration(
+        labelText: "Sexo",
+        labelStyle: GoogleFonts.roboto(
+          color: const Color(0xFF1B2727),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF1B2727), width: 2),
+        ),
+      ),
+      style: GoogleFonts.roboto(
+        color: const Color(0xFF1B2727),
+      ),
+      dropdownColor: Colors.white,
+      value: _genSelected,
+      items: _genero.map((opcion) =>
+          DropdownMenuItem(
+              value: opcion,
+              child: Text(
+                opcion,
+                style: GoogleFonts.roboto(
+                  color: const Color(0xFF1B2727),
+                ),
+              )
+          )
+      ).toList(),
+      onChanged: (String? newOpt) {
+        setState(() => _genSelected = newOpt);
+      },
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Seleccione su sexo";
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return TextFormField(
+      controller: passwordController,
+      obscureText: _obscureText,
+      style: GoogleFonts.roboto(
+        color: const Color(0xFF1B2727),
+      ),
+      cursorColor: const Color(0xFF1B2727),
+      decoration: InputDecoration(
+        labelText: "Contraseña",
+        labelStyle: GoogleFonts.roboto(
+          color: const Color(0xFF1B2727),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF1B2727), width: 2),
+        ),
+        suffixIcon: IconButton(
+          icon: Icon(
+            _obscureText ? Icons.visibility_off : Icons.visibility,
+            color: const Color(0xFF3c5148),
+          ),
+          onPressed: () {
+            setState(() {
+              _obscureText = !_obscureText;
+            });
+          },
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) return "Ingrese su contraseña";
+        // if (value.length < 6) return "La contraseña debe tener al menos 6 caracteres";
+        return null;
+      },
+    );
+  }
+
+  Widget _buildTextField(String label, TextEditingController controller, {bool isEmail = false, bool isPhone = false}) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: isEmail ? TextInputType.emailAddress : isPhone ? TextInputType.phone : TextInputType.text,
+      style: GoogleFonts.roboto(
+        color: const Color(0xFF1B2727),
+      ),
+      cursorColor: const Color(0xFF1B2727),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.roboto(
+          color: const Color(0xFF1B2727),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF1B2727), width: 2),
         ),
       ),
       validator: (value) {
