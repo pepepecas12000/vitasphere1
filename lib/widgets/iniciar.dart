@@ -42,7 +42,7 @@ class _IniciarState extends State<Iniciar> {
         SnackBar(
           content: Text(
             esValido ? "✅ Inicio de sesión exitoso" : "❌ Email o contraseña incorrectos",
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Color(0xFFB0B8CF)),
           ),
           backgroundColor: esValido ? Color(0xFF6B8E4E) : Colors.black,
         ),

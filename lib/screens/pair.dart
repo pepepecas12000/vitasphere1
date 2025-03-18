@@ -109,7 +109,6 @@ class _PairState extends State<Pair> {
           delayed: true, next: true);
 
       // Navegar a la siguiente pantalla
-      // Navegar a la siguiente pantalla
       if (mounted) {
         Navigator.push(
           context,
@@ -146,7 +145,7 @@ class _PairState extends State<Pair> {
           "Conectar",
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Color(0xFFD5DDDF),
           ),
         ),
         backgroundColor: const Color(0xFF4D638C),
