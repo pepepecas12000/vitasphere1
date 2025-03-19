@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vitasphere1/widgets/home.dart';
+import 'package:vitasphere1/widgets/inicio.dart';
 import 'package:vitasphere1/widgets/registrar.dart';
 import '../db/database.dart';
 
@@ -47,7 +48,7 @@ class _IniciarState extends State<Iniciar> {
       );
 
       if (esValido) {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => Home(),));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => Inicio(),));
       }
     }
   }
