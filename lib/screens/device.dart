@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../widgets/bottom_bar.dart';
+import '../widgets/bottom.dart';
 
 class Device extends StatefulWidget {
-  final BluetoothDevice? device;
+  final BluetoothDevice? connectedDevice;
 
-  const Device({super.key, this.device});
+  const Device({super.key, this.connectedDevice});
 
   @override
   _DeviceState createState() => _DeviceState();
 }
 
 class _DeviceState extends State<Device> {
+
+  late BluetoothDevice? _connectedDevice;
+
   // Estados de los componentes
   bool _ledState = false;
   bool _buzzerState = false;
@@ -34,6 +37,7 @@ class _DeviceState extends State<Device> {
   @override
   void initState() {
     super.initState();
+    _connectedDevice = widget.connectedDevice;
     _connectToDevice();
   }
 
@@ -47,14 +51,14 @@ class _DeviceState extends State<Device> {
   }
 
   Future<void> _connectToDevice() async {
-    if (widget.device == null) {
+    if (widget.connectedDevice == null) {
       debugPrint("No hay dispositivo conectado");
       return;
     }
 
     try {
       // Descubrir servicios
-      List<BluetoothService> services = await widget.device!.discoverServices();
+      List<BluetoothService> services = await widget.connectedDevice!.discoverServices();
       for (var service in services) {
         if (service.uuid.toString() == SERVICE_UUID) {
           for (var characteristic in service.characteristics) {
@@ -185,7 +189,7 @@ class _DeviceState extends State<Device> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Color(0x0D000000),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -226,6 +230,7 @@ class _DeviceState extends State<Device> {
     return Scaffold(
       backgroundColor: const Color(0xFFD5DDDF),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           "Control del dispositivo",
           style: GoogleFonts.quicksand(
@@ -294,7 +299,7 @@ class _DeviceState extends State<Device> {
           ),
         ),
       ),
-      bottomNavigationBar: const BottomBar(),
+      bottomNavigationBar: Bottom(connectedDevice: _connectedDevice),
     );
   }
 }

@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../widgets/bottom.dart';
 import 'device.dart';
-import '../widgets/bottom_bar.dart';
 
 class Pair extends StatefulWidget {
-  const Pair({super.key});
+  final BluetoothDevice? connectedDevice;
+
+  const Pair({super.key, this.connectedDevice});
 
   @override
   _PairState createState() => _PairState();
@@ -24,6 +26,8 @@ class _PairState extends State<Pair> {
   @override
   void initState() {
     super.initState();
+
+    _connectedDevice = widget.connectedDevice;
 
     // Escuchar el estado del Bluetooth
     _adapterStateSubscription = FlutterBluePlus.adapterState.listen((state) {
@@ -113,7 +117,7 @@ class _PairState extends State<Pair> {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => Device(device: _connectedDevice)),
+              builder: (context) => Device(connectedDevice: _connectedDevice)),
         );
       }
     } catch (e) {
@@ -136,11 +140,52 @@ class _PairState extends State<Pair> {
     }
   }
 
+  Widget _buildDeviceList() {
+    List<BluetoothDevice> allDevices = [];
+
+    // Añadir dispositivo conectado si existe
+    if (_connectedDevice != null) {
+      allDevices.add(_connectedDevice!);
+    }
+
+    // Añadir resultados del escaneo excluyendo el dispositivo conectado
+    for (var result in _scanResults) {
+      if (result.device.remoteId != _connectedDevice?.remoteId) {
+        allDevices.add(result.device);
+      }
+    }
+
+    return ListView.builder(
+      itemCount: allDevices.length,
+      itemBuilder: (context, index) {
+        final device = allDevices[index];
+        return ListTile(
+          leading: const Icon(Icons.devices),
+          title: Text(
+            device.platformName.isNotEmpty
+                ? device.platformName
+                : "Dispositivo sin nombre",
+          ),
+          trailing: _connectedDevice?.remoteId == device.remoteId
+              ? ElevatedButton(
+            onPressed: _disconnectDevice,
+            child: const Text("Desconectar"),
+          )
+              : ElevatedButton(
+            onPressed: () => _connectToDevice(device),
+            child: const Text("Conectar"),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFD5DDDF),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           "Conectar",
           style: GoogleFonts.quicksand(
@@ -159,7 +204,8 @@ class _PairState extends State<Pair> {
             children: [
               Text("Conectar dispositivo"),
               const SizedBox(height: 8),
-              Text("Conecta tu dispositivo e inicia tu tranquilidad"),
+              Text(
+                  "Conecta tu dispositivo VitaSphere e inicia tu tranquilidad"),
               const SizedBox(height: 32),
 
               // Tarjeta Bluetooth
@@ -191,42 +237,18 @@ class _PairState extends State<Pair> {
               // Lista de dispositivos detectados
               Text('Lista de dispositivos'),
               const SizedBox(height: 16),
-
               Expanded(
                 child: AnimatedOpacity(
-                  opacity:
-                      _adapterState == BluetoothAdapterState.on ? 1.0 : 0.5,
+                  opacity: _adapterState == BluetoothAdapterState.on ? 1.0 : 0.5,
                   duration: const Duration(milliseconds: 300),
-                  child: ListView.builder(
-                    itemCount: _scanResults.length,
-                    itemBuilder: (context, index) {
-                      final result = _scanResults[index];
-                      final device = result.device;
-
-                      return ListTile(
-                        leading: const Icon(Icons.devices),
-                        title: Text(device.platformName.isNotEmpty
-                            ? device.platformName
-                            : "Dispositivo sin nombre"),
-                        trailing: _connectedDevice?.remoteId == device.remoteId
-                            ? ElevatedButton(
-                                onPressed: _disconnectDevice,
-                                child: const Text("Desconectar"),
-                              )
-                            : ElevatedButton(
-                                onPressed: () => _connectToDevice(device),
-                                child: const Text("Conectar"),
-                              ),
-                      );
-                    },
-                  ),
+                  child: _buildDeviceList(), // Usa el nuevo método aquí
                 ),
               ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: const BottomBar(),
+      bottomNavigationBar: Bottom(connectedDevice: _connectedDevice),
     );
   }
 }
