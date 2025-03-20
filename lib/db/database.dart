@@ -124,7 +124,7 @@ class MongoDatabase {
         SharedPreferences prefs = await SharedPreferences.getInstance(); // Obtener instancia de SharedPreferences
 
         try {
-          String userId = user["_id"].toString();  // Obtener desde base de datos el id del usuario
+          String userId = (user["_id"] as ObjectId).oid;  // Obtener el id del usuario desde base de datos
           await prefs.setString("user_id", userId); // Guardar id del usuario en SharedPreferences
           return true;
         } catch (e) {

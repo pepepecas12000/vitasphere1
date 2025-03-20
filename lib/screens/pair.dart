@@ -241,7 +241,7 @@ class _PairState extends State<Pair> {
                 child: AnimatedOpacity(
                   opacity: _adapterState == BluetoothAdapterState.on ? 1.0 : 0.5,
                   duration: const Duration(milliseconds: 300),
-                  child: _buildDeviceList(), // Usa el nuevo método aquí
+                  child: _buildDeviceList(),
                 ),
               ),
             ],
