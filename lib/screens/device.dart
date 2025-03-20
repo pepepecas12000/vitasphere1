@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/bottom.dart';
+import '../db/database.dart';
 
 class Device extends StatefulWidget {
   final BluetoothDevice? connectedDevice;
@@ -13,6 +15,7 @@ class Device extends StatefulWidget {
 }
 
 class _DeviceState extends State<Device> {
+  late String? _userId;
   late BluetoothDevice? _connectedDevice;
 
   // Estados de los componentes
@@ -21,38 +24,59 @@ class _DeviceState extends State<Device> {
   bool _vibrationState = false;
   bool _deviceState = false;
 
+  bool _alarmState = false;
+
   // UUID del servicio y características BLE
   final String SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
+
+  final String USER_CHARACTERISTIC_UUID =
+      "beb5483e-36e1-4688-b7f5-ea07361b26ab";
   final String LED_CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
   final String BUZZER_CHARACTERISTIC_UUID =
       "beb5483e-36e1-4688-b7f5-ea07361b26a9";
   final String VIBRATION_CHARACTERISTIC_UUID =
       "beb5483e-36e1-4688-b7f5-ea07361b26aa";
+  final String ALARM_CHARACTERISTIC_UUID =
+      "beb5483e-36e1-4688-b7f5-ea07361b26ac";
 
+  BluetoothCharacteristic? _userCharacteristic;
   BluetoothCharacteristic? _ledCharacteristic;
   BluetoothCharacteristic? _buzzerCharacteristic;
   BluetoothCharacteristic? _vibrationCharacteristic;
+
+  BluetoothCharacteristic? _alarmCharacteristic;
 
   @override
   void initState() {
     super.initState();
     _connectedDevice = widget.connectedDevice;
+    _getUserId();
     _connectToDevice();
   }
 
   @override
   void dispose() {
-    // Asegúrate de apagar todos los componentes al salir
-    _toggleLed(false);
-    _toggleBuzzer(false);
-    _toggleVibration(false);
     super.dispose();
+  }
+
+  Future<void> _getUserId() async {
+    try {
+      _userId = await MongoDatabase.obtenerUsuarioAct();
+      if (_userId == null) throw Exception("UserID nulo");
+    } catch (e) {
+      debugPrint("Error al obtener el usuario actual: $e");
+    }
   }
 
   Future<void> _connectToDevice() async {
     if (widget.connectedDevice == null) {
       debugPrint("No hay dispositivo conectado");
       return;
+    }
+
+    // Verificar conexión primero
+    if (!widget.connectedDevice!.isConnected) {
+      await widget.connectedDevice!.connect();
     }
 
     try {
@@ -62,7 +86,10 @@ class _DeviceState extends State<Device> {
       for (var service in services) {
         if (service.uuid.toString() == SERVICE_UUID) {
           for (var characteristic in service.characteristics) {
-            if (characteristic.uuid.toString() == LED_CHARACTERISTIC_UUID) {
+            if (characteristic.uuid.toString() == USER_CHARACTERISTIC_UUID) {
+              _userCharacteristic = characteristic;
+            } else if (characteristic.uuid.toString() ==
+                LED_CHARACTERISTIC_UUID) {
               _ledCharacteristic = characteristic;
             } else if (characteristic.uuid.toString() ==
                 BUZZER_CHARACTERISTIC_UUID) {
@@ -70,6 +97,9 @@ class _DeviceState extends State<Device> {
             } else if (characteristic.uuid.toString() ==
                 VIBRATION_CHARACTERISTIC_UUID) {
               _vibrationCharacteristic = characteristic;
+            } else if (characteristic.uuid.toString() ==
+                ALARM_CHARACTERISTIC_UUID) {
+              _alarmCharacteristic = characteristic;
             }
           }
         }
@@ -79,10 +109,33 @@ class _DeviceState extends State<Device> {
         _deviceState = true;
       });
 
+      // Asignar usuario
+      if (_userCharacteristic?.properties.write ?? false) {
+        await _writeUser();
+      }
+
       // Leer estados iniciales
       _readInitialStates();
     } catch (e) {
       debugPrint("Error al conectar con el dispositivo: $e");
+    }
+  }
+
+  _writeUser() async {
+    if (_userId == null || _userId!.isEmpty) {
+      debugPrint("Error: UserID no válido");
+      return;
+    }
+    if (_userCharacteristic == null) {
+      debugPrint("Característica de usuario no encontrada");
+      return;
+    }
+    try {
+      final bytes = utf8.encode(_userId!);
+      await _userCharacteristic!.write(bytes);
+      debugPrint("Usuario enviado");
+    } catch (e) {
+      debugPrint("Error escribiendo UserID: $e");
     }
   }
 
@@ -108,6 +161,14 @@ class _DeviceState extends State<Device> {
         final value = await _vibrationCharacteristic!.read();
         setState(() {
           _vibrationState = value[0] > 0;
+        });
+      }
+
+      if (_alarmCharacteristic != null &&
+          _alarmCharacteristic!.properties.read) {
+        final value = await _alarmCharacteristic!.read();
+        setState(() {
+          _alarmState = value[0] > 0;
         });
       }
     } catch (e) {
@@ -172,6 +233,21 @@ class _DeviceState extends State<Device> {
       });
     } catch (e) {
       debugPrint("Error al cambiar el estado del dispositivo: $e");
+    }
+  }
+
+  Future<void> _toggleAlarm(bool value) async {
+    if (_alarmCharacteristic != null &&
+        _alarmCharacteristic!.properties.write) {
+      try {
+        await _alarmCharacteristic!.write([value ? 1 : 0]);
+        setState(() {
+          _alarmState = value;
+        });
+        debugPrint("Alarma ${value ? 'activada' : 'desactivada'}");
+      } catch (e) {
+        debugPrint("Error al cambiar el estado de la alarma: $e");
+      }
     }
   }
 
@@ -287,6 +363,13 @@ class _DeviceState extends State<Device> {
                 onChanged: _toggleVibration,
                 enabled: _deviceState,
               ),
+              ElevatedButton(onPressed: (){
+                if (_alarmState){
+                  _toggleAlarm;
+                } else if (!_alarmState){
+                  debugPrint("La alarma se encuentra apagada");
+                }
+              }, child: const Text("Apagar alarma")),
             ],
           ),
         ),

@@ -5,9 +5,9 @@ import 'iniciar.dart';
 
 class Welcome extends StatefulWidget {
 
-  final String? userEmail;
+  final String? userId;
 
-  const Welcome({super.key, this.userEmail});
+  const Welcome({super.key, this.userId});
 
   @override
   State<Welcome> createState() => _WelcomeState();
@@ -15,13 +15,13 @@ class Welcome extends StatefulWidget {
 
 class _WelcomeState extends State<Welcome> {
 
-  String? userEmail;
+  String? _userId;
 
   @override
   void initState() {
     super.initState();
     redirect();
-    userEmail = widget.userEmail;
+    _userId = widget.userId;
   }
 
   void redirect() {
@@ -31,7 +31,7 @@ class _WelcomeState extends State<Welcome> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => userEmail != null ? Monitor() : const Iniciar(),
+            builder: (context) => _userId != null ? Monitor() : const Iniciar(),
           ),
         );
       },
