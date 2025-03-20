@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,13 +21,13 @@ class MongoDatabase {
       await db.open();
       collection = db.collection(COLLECTION_NAME);
       isConnected = true;
-      print("✅ Conexión exitosa a MongoDB Atlas");
+      debugPrint("Conexión exitosa a MongoDB Atlas");
     } catch (e) {
-      print("❌ Error en la conexión a MongoDB: $e");
+      debugPrint("Error en la conexión a MongoDB: $e");
     }
   }
 
-  /// **Encriptar contraseña con HMAC-SHA256**
+  // Encriptar contraseña con HMAC-SHA256
   static String encriptarPassword(String password) {
     var key = utf8.encode(SECRET_KEY);
     var bytes = utf8.encode(password);
@@ -35,16 +36,27 @@ class MongoDatabase {
     return base64.encode(digest.bytes);
   }
 
-  /// **Registrar un nuevo usuario en MongoDB**
+  // Registrar un nuevo usuario en MongoDB
   static Future<bool> registrarUsuario(
-      String nombre, String apellidos, String telefono, String email, String password, String fecha, String sexo) async {
+      String nombre,
+      String apellidos,
+      String tel,
+      String email,
+      String password,
+      String fecha,
+      String sexo) async {
     try {
-      print("📝 Intentando registrar usuario con email: $email");
+      debugPrint("📝Intentando registrar usuario con email: $email");
 
       // Verificar si el usuario ya existe
       var existingUser = await collection.findOne({"email": email});
       if (existingUser != null) {
-        print("❌ El usuario ya existe.");
+        debugPrint("El usuario ya existe.");
+        return false;
+      }
+
+      if (password == "") {
+        debugPrint("La contraseña no puede estar vacía.");
         return false;
       }
 
@@ -55,77 +67,88 @@ class MongoDatabase {
         "_id": ObjectId(),
         "nombre": nombre.trim(),
         "apellidos": apellidos.trim(),
-        "telefono": telefono.trim(),
+        "telefono": tel.trim(),
         "email": email.trim(),
         "sexo": sexo.trim(),
-        "password": hashedPassword, // Contraseña encriptada
-        "confpassword": hashedPassword, // Para validación extra si es necesario
+        "password": hashedPassword,
         "fecha": fecha.trim(),
+        "estado": "activo",
       };
 
       var result = await collection.insertOne(nuevoUsuario);
 
       if (result.isSuccess) {
-        print("✅ Usuario registrado con éxito.");
+        debugPrint("Usuario registrado con éxito.");
         return true;
       } else {
-        print("❌ Error al registrar usuario.");
+        debugPrint("Error al registrar usuario.");
         return false;
       }
     } catch (e) {
-      print("❌ Error inesperado al registrar usuario: $e");
+      debugPrint("Error inesperado al registrar usuario: $e");
       return false;
     }
   }
 
-  /// **Verificar usuario y contraseña en MongoDB**
+  // Verificar usuario y contraseña en MongoDB
   static Future<bool> verificarUsuario(String email, String password) async {
     try {
-      print("🔎 Buscando usuario con correo: $email");
+      debugPrint("🔎Buscando usuario con correo: $email");
 
-      var user = await collection.findOne({
-        "email": {"\$regex": "^${RegExp.escape(email)}\$", "\$options": "i"}
-      });
+      var user = await collection.findOne({"email": email.trim()});
 
       if (user == null) {
-        print("❌ Usuario no encontrado.");
+        debugPrint("Usuario no encontrado.");
         return false;
       }
 
-      print("✅ Usuario encontrado: ${user['email']}");
+      debugPrint("Usuario encontrado: ${user['email']}");
 
-      // Extraer contraseñas almacenadas en la base de datos
-      String storedPassword = user["password"];
+      // Extraer el estado del usuario
+      String estado = user["estado"];
 
-      // Encriptar la contraseña ingresada para compararla
-      String hashedPassword = encriptarPassword(password);
+      if (estado == "inactivo") {
+        debugPrint("Usuario inactivo.");
+        return false;
+      }
+
+      String storedPassword = user["password"]; // Extraer contraseñas almacenadas en la base de datos
+
+      String hashedPassword = encriptarPassword(password); // Encriptar la contraseña ingresada para compararla
 
       // Comparar con la base de datos
       if (hashedPassword == storedPassword) {
-        print("✅ Inicio de sesión exitoso para: ${user['email']}");
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString("user_email", email);
-        return true;
+
+        debugPrint("Inicio de sesión exitoso para: ${user['email']}"); // Confirmación de inicio de sesión
+
+        SharedPreferences prefs = await SharedPreferences.getInstance(); // Obtener instancia de SharedPreferences
+
+        try {
+          String userId = user["_id"].toString();  // Obtener desde base de datos el id del usuario
+          await prefs.setString("user_id", userId); // Guardar id del usuario en SharedPreferences
+          return true;
+        } catch (e) {
+          debugPrint("Error al guardar el ID: $e");
+          return false;
+        }
+
       } else {
-        print(storedPassword);
-        print(hashedPassword);
-        print("❌ Contraseña incorrecta.");
+        debugPrint("Contraseña incorrecta.");
         return false;
       }
     } catch (e) {
-      print("❌ Error inesperado al verificar usuario: $e");
+      debugPrint("Error inesperado al verificar usuario: $e");
       return false;
     }
   }
 
-  static Future<void> cerrarSesion() async{
+  static Future<void> cerrarSesion() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove("user_email");
+    await prefs.remove("user_id");
   }
 
-  static Future<String?> obtenerUsuarioAct() async{
+  static Future<String?> obtenerUsuarioAct() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString("user_email");
-
+    return prefs.getString("user_id");
   }
 }
