@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../screens/monitor.dart';
 import 'home.dart';
 
 class App extends StatelessWidget {
@@ -12,6 +13,6 @@ class App extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: "VitaSphere",
         initialRoute: "home",
-        home: Home());
+        home: Monitor());//Home());
   }
 }
