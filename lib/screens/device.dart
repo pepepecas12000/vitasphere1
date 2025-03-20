@@ -13,7 +13,6 @@ class Device extends StatefulWidget {
 }
 
 class _DeviceState extends State<Device> {
-
   late BluetoothDevice? _connectedDevice;
 
   // Estados de los componentes
@@ -58,7 +57,8 @@ class _DeviceState extends State<Device> {
 
     try {
       // Descubrir servicios
-      List<BluetoothService> services = await widget.connectedDevice!.discoverServices();
+      List<BluetoothService> services =
+          await widget.connectedDevice!.discoverServices();
       for (var service in services) {
         if (service.uuid.toString() == SERVICE_UUID) {
           for (var characteristic in service.characteristics) {
@@ -122,7 +122,7 @@ class _DeviceState extends State<Device> {
         setState(() {
           _ledState = value;
         });
-        debugPrint("LED ${value ? 'encendido' : 'apagado'}");
+        debugPrint("LED ${value ? 'habilitado' : 'deshabilitado'}");
       } catch (e) {
         debugPrint("Error al cambiar el estado del LED: $e");
       }
@@ -137,7 +137,7 @@ class _DeviceState extends State<Device> {
         setState(() {
           _buzzerState = value;
         });
-        debugPrint("Buzzer ${value ? 'encendido' : 'apagado'}");
+        debugPrint("Sonido ${value ? 'habilitado' : 'deshabilitado'}");
       } catch (e) {
         debugPrint("Error al cambiar el estado del buzzer: $e");
       }
@@ -152,7 +152,7 @@ class _DeviceState extends State<Device> {
         setState(() {
           _vibrationState = value;
         });
-        debugPrint("Vibración ${value ? 'encendida' : 'apagada'}");
+        debugPrint("Vibración ${value ? 'habilitada' : 'deshabilitada'}");
       } catch (e) {
         debugPrint("Error al cambiar el estado de la vibración: $e");
       }
@@ -202,7 +202,7 @@ class _DeviceState extends State<Device> {
             color: const Color(0xFFF2F2F2),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: Colors.black54),
+          child: Icon(icon, color: Colors.black),
         ),
         title: Text(
           title,
@@ -238,7 +238,7 @@ class _DeviceState extends State<Device> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: const Color(0xFF4D638C),
+        backgroundColor: const Color(0xFF001D47),
         elevation: 0,
       ),
       body: SafeArea(
@@ -247,49 +247,41 @@ class _DeviceState extends State<Device> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Control del dispositivo",
-                style: GoogleFonts.quicksand(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               const SizedBox(height: 8),
               Text(
-                "Configura tu dispositivo según tus necesidades!",
-                style: GoogleFonts.quicksand(),
+                "Configura el dispositivo según tus necesidades!",
+                style: GoogleFonts.roboto(
+                  fontSize: 18,
+                  color: Color(0xFF1B2727),
+                ),
               ),
               const SizedBox(height: 32),
-              // Control de dispositivo
               _buildControlTile(
-                title: "Dispositivo",
-                subtitle: "Encender/apagar",
-                icon: Icons.devices,
+                title: "Alerta",
+                subtitle: "Habilitar/Deshabilitar",
+                icon: Icons.crisis_alert,
                 value: _deviceState,
                 onChanged: _toggleDevice,
               ),
-              // Control del LED
               _buildControlTile(
                 title: "Led indicador",
-                subtitle: "Encender/apagar",
+                subtitle: "Habilitar/Deshabilitar",
                 icon: Icons.lightbulb_outline,
                 value: _ledState,
                 onChanged: _toggleLed,
                 enabled: _deviceState,
               ),
-              // Control del Buzzer
               _buildControlTile(
-                title: "Alarma",
-                subtitle: "Encender/apagar",
-                icon: Icons.notifications,
+                title: "Sonido",
+                subtitle: "Habilitar/Deshabilitar",
+                icon: Icons.volume_up_outlined,
                 value: _buzzerState,
                 onChanged: _toggleBuzzer,
                 enabled: _deviceState,
               ),
-              // Control de la vibración
               _buildControlTile(
                 title: "Vibración",
-                subtitle: "Encender/apagar",
+                subtitle: "Habilitar/Deshabilitar",
                 icon: Icons.vibration,
                 value: _vibrationState,
                 onChanged: _toggleVibration,

@@ -25,7 +25,7 @@ class _BottomState extends State<Bottom> {
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
-      color: const Color(0xFF4D638C),
+      color: const Color(0xFF001D47),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -39,7 +39,7 @@ class _BottomState extends State<Bottom> {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.favorite, color: Color(0xFFD5DDDF)),
+            icon: Icon(Icons.favorite, color: Color(0xFFD5DDDF),),
             onPressed: () {
               if (_connectedDevice == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -48,7 +48,7 @@ class _BottomState extends State<Bottom> {
                       "No hay ningún dispositivo conectado",
                       style: const TextStyle(color: Color(0xFFB0B8CF)),
                     ),
-                    backgroundColor: Color(0xFF001D47),
+                    backgroundColor: Color(0xFF4D638C),
                   ),
                 );
                 return;

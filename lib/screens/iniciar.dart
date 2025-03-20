@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vitasphere1/widgets/registrar.dart';
+import 'package:vitasphere1/screens/registrar.dart';
 import '../db/database.dart';
 import 'package:vitasphere1/screens/pair.dart';
 import 'package:google_fonts/google_fonts.dart';

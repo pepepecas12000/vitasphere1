@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'home.dart';
+import '../screens/welcome.dart';
 
 class App extends StatelessWidget {
   final String? userEmail;
@@ -9,9 +8,9 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: "VitaSphere",
-        initialRoute: "home",
-        home: Home());
+      debugShowCheckedModeBanner: false,
+      title: "VitaSphere",
+      home: userEmail != null ? Welcome(userEmail: userEmail) : const Welcome(),
+    );
   }
 }

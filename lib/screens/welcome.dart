@@ -1,29 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:vitasphere1/screens/monitor.dart';
 import 'iniciar.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class Welcome extends StatefulWidget {
+
+  final String? userEmail;
+
+  const Welcome({super.key, this.userEmail});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<Welcome> createState() => _WelcomeState();
 }
 
-class _HomeState extends State<Home> {
+class _WelcomeState extends State<Welcome> {
+
+  String? userEmail;
+
   @override
   void initState() {
     super.initState();
     redirect();
+    userEmail = widget.userEmail;
   }
 
   void redirect() {
     Future.delayed(
-      const Duration(seconds: 5),
+      const Duration(seconds: 3),
       () {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => const Iniciar(),
+            builder: (context) => userEmail != null ? Monitor() : const Iniciar(),
           ),
         );
       },
@@ -80,6 +88,7 @@ class _HomeState extends State<Home> {
               ),
 
               // Indicador de carga
+              /*
               const SizedBox(height: 60),
               SizedBox(
                 width: 40,
@@ -91,6 +100,7 @@ class _HomeState extends State<Home> {
                   strokeWidth: 3,
                 ),
               ),
+              */
             ],
           ),
         ),

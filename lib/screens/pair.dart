@@ -193,7 +193,7 @@ class _PairState extends State<Pair> {
             color: Color(0xFFD5DDDF),
           ),
         ),
-        backgroundColor: const Color(0xFF4D638C),
+        backgroundColor: const Color(0xFF001D47),
         elevation: 0,
       ),
       body: SafeArea(
