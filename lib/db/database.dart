@@ -7,11 +7,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 class MongoDatabase {
   static late Db db;
   static late DbCollection collection;
+  static late DbCollection Registros;
   static bool isConnected = false;
+  static bool isConnected2 = false;
 
   static const MONGO_URL =
       "mongodb+srv://arturo2005sidas:Sidas-200@vitasphere.nvtg2.mongodb.net/VitaSphere?retryWrites=true&w=majority";
   static const COLLECTION_NAME = "Users";
+
+  static const COLLECTION_METRIC = "Registro";
   static const String SECRET_KEY = "vita";
 
   static Future<void> connect() async {
@@ -21,11 +25,36 @@ class MongoDatabase {
       await db.open();
       collection = db.collection(COLLECTION_NAME);
       isConnected = true;
-      debugPrint("Conexión exitosa a MongoDB Atlas");
+      debugPrint("Conexión exitosa a MongoDB Atlas: Usuarios");
+
+
     } catch (e) {
       debugPrint("Error en la conexión a MongoDB: $e");
     }
+    try {
+      db = await Db.create(MONGO_URL);
+      await db.open();
+      Registros = db.collection(COLLECTION_METRIC);
+      isConnected2 = true;
+      debugPrint("✅ Conexión exitosa a MongoDB Atlas: Registros");
+    } catch (e) {
+      print("❌ Error en la conexión a MongoDB: $e");
+    }
+
+
   }
+ /* static Future<void> connect2() async {
+    if (isConnected) return;
+    try {
+      db = await Db.create(MONGO_URL);
+      await db.open();
+      Registros = db.collection(COLLECTION_METRIC);
+      isConnected2 = true;
+      print("✅ Conexión exitosa a MongoDB Atlas: Registros");
+    } catch (e) {
+      print("❌ Error en la conexión a MongoDB: $e");
+    }
+  }*/
 
   // Encriptar contraseña con HMAC-SHA256
   static String encriptarPassword(String password) {
@@ -151,4 +180,42 @@ class MongoDatabase {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString("user_id");
   }
+
+  static Future<String> obtenerNombre()async{
+    String? id = await obtenerUsuarioAct();
+    String? nombre;
+    Map<String,dynamic?>? datusu;
+    debugPrint("el id del usuario es el de: $id");
+    try {
+       datusu = await collection.findOne({"_id": id});
+     nombre=datusu?["nombre"];
+    }catch(e){
+      debugPrint("No se encontro el nombre: $e");
+    }
+    return nombre ?? "no";
+  }
+
+  static Future<Stream<Map<String, dynamic>>?> ultmetrica() async {
+    try {
+      var ultimaMetrica = await Registros.modernFind(filter:
+      {"tipo": "Metricas"},sort: {"_id": -1}, limit:1 // Ordenar por _id en orden descendente (el más reciente primero)
+      );
+
+      return ultimaMetrica;
+    } catch (e) {
+      print("❌ Error al obtener la última métrica: $e");
+      return null;
+    }
+
+/*String? userEmail = await obtenerUsuarioAct();
+    var existingUser = await MongoDatabase.collection.findOne({
+      "email": "j@j.com"//,
+    });
+    return existingUser;
+    var metricas= await MongoDatabase.Registros.find({
+      "id": existingUser?["_id"].toString(),
+    });*/
+  }
+
+
 }

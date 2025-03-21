@@ -57,7 +57,7 @@ class _BottomState extends State<Bottom> {
                   context,
                   MaterialPageRoute(
                       builder: (context) =>
-                          Monitor(connectedDevice: _connectedDevice)),
+                          Monitor()), //connectedDevice: _connectedDevice
                 );
               }
             },
