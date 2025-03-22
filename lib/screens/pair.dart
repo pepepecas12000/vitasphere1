@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:vitasphere1/widgets/profile_btn.dart';
 import '../widgets/bottom.dart';
 import 'device.dart';
 
@@ -195,6 +196,9 @@ class _PairState extends State<Pair> {
         ),
         backgroundColor: const Color(0xFF001D47),
         elevation: 0,
+        actions: [
+          ProfileBtn(),
+        ],
       ),
       body: SafeArea(
         child: Padding(
