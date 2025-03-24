@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+
 class MongoDatabase {
   static late Db db;
   static late DbCollection collection;
@@ -187,8 +189,14 @@ class MongoDatabase {
     Map<String,dynamic?>? datusu;
     debugPrint("el id del usuario es el de: $id");
     try {
-       datusu = await collection.findOne({"_id": id});
+
+      ObjectId lol = ObjectId.parse(id!);
+      debugPrint(lol.toString());
+
+       datusu = await collection.findOne({"_id": lol});
+       debugPrint(" esta es la cantidad $datusu?.length");
      nombre=datusu?["nombre"];
+     debugPrint(" el nombre del cliente es $nombre");
     }catch(e){
       debugPrint("No se encontro el nombre: $e");
     }
