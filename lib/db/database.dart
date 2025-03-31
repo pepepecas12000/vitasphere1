@@ -45,18 +45,6 @@ class MongoDatabase {
 
 
   }
- /* static Future<void> connect2() async {
-    if (isConnected) return;
-    try {
-      db = await Db.create(MONGO_URL);
-      await db.open();
-      Registros = db.collection(COLLECTION_METRIC);
-      isConnected2 = true;
-      print("✅ Conexión exitosa a MongoDB Atlas: Registros");
-    } catch (e) {
-      print("❌ Error en la conexión a MongoDB: $e");
-    }
-  }*/
 
   // Encriptar contraseña con HMAC-SHA256
   static String encriptarPassword(String password) {
@@ -143,26 +131,30 @@ class MongoDatabase {
         return false;
       }
 
-      String storedPassword = user["password"]; // Extraer contraseñas almacenadas en la base de datos
+      String storedPassword = user[
+          "password"]; // Extraer contraseñas almacenadas en la base de datos
 
-      String hashedPassword = encriptarPassword(password); // Encriptar la contraseña ingresada para compararla
+      String hashedPassword = encriptarPassword(
+          password); // Encriptar la contraseña ingresada para compararla
 
       // Comparar con la base de datos
       if (hashedPassword == storedPassword) {
+        debugPrint(
+            "Inicio de sesión exitoso para: ${user['email']}"); // Confirmación de inicio de sesión
 
-        debugPrint("Inicio de sesión exitoso para: ${user['email']}"); // Confirmación de inicio de sesión
-
-        SharedPreferences prefs = await SharedPreferences.getInstance(); // Obtener instancia de SharedPreferences
+        SharedPreferences prefs = await SharedPreferences
+            .getInstance(); // Obtener instancia de SharedPreferences
 
         try {
-          String userId = (user["_id"] as ObjectId).oid;  // Obtener el id del usuario desde base de datos
-          await prefs.setString("user_id", userId); // Guardar id del usuario en SharedPreferences
+          String userId = (user["_id"] as ObjectId)
+              .oid; // Obtener el id del usuario desde base de datos
+          await prefs.setString(
+              "user_id", userId); // Guardar id del usuario en SharedPreferences
           return true;
         } catch (e) {
           debugPrint("Error al guardar el ID: $e");
           return false;
         }
-
       } else {
         debugPrint("Contraseña incorrecta.");
         return false;
@@ -183,6 +175,56 @@ class MongoDatabase {
     return prefs.getString("user_id");
   }
 
+  static Future<void> ligarDispositivo(String deviceName) async {
+    String? appUser = await obtenerUsuarioAct();
+
+    if (appUser == null) {
+      debugPrint("El usuario es nulo");
+      return;
+    }
+
+    var objectId = ObjectId.parse(appUser);
+
+    var result = await collection.updateOne(
+      {
+        "_id": objectId,
+        "dispositivos.modelo": deviceName // Busca si el dispositivo ya existe
+      },
+      {
+        "\$set": {
+          "dispositivos.\$.estado": "activo" // Si existe, actualiza su estado
+        }
+      },
+    );
+
+    if (result.nModified == 0) {
+      // Verifica si el dispositivo ya existe con el mismo estado activo
+      var existing = await collection.findOne({
+        "_id": objectId,
+        "dispositivos": {
+          "\$elemMatch": { "modelo": deviceName, "estado": "activo" }
+        }
+      });
+
+      if (existing == null) {
+        // Si no existe un dispositivo con el mismo modelo y estado, se agrega
+        await collection.updateOne(
+          {"_id": objectId},
+          {
+            "\$push": {
+              "dispositivos": { "modelo": deviceName, "estado": "activo" }
+            }
+          },
+        );
+        debugPrint("Dispositivo agregado.");
+      } else {
+        debugPrint("Dispositivo ya está registrado con el estado activo.");
+      }
+    } else {
+      debugPrint("Dispositivo actualizado.");
+    }
+  }
+  
   static Future<String> obtenerNombre()async{
     String? id = await obtenerUsuarioAct();
     String? nombre;
@@ -214,16 +256,5 @@ class MongoDatabase {
       print("❌ Error al obtener la última métrica: $e");
       return null;
     }
-
-/*String? userEmail = await obtenerUsuarioAct();
-    var existingUser = await MongoDatabase.collection.findOne({
-      "email": "j@j.com"//,
-    });
-    return existingUser;
-    var metricas= await MongoDatabase.Registros.find({
-      "id": existingUser?["_id"].toString(),
-    });*/
   }
-
-
 }

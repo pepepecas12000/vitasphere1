@@ -22,6 +22,18 @@ class _BottomState extends State<Bottom> {
     _connectedDevice = widget.connectedDevice;
   }
 
+  void _notActual(BuildContext context, String route, Widget page) {
+    if (ModalRoute.of(context)?.settings.name != route) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => page,
+          settings: RouteSettings(name: route),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
@@ -30,16 +42,27 @@ class _BottomState extends State<Bottom> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           IconButton(
-            icon: Icon(Icons.link, color: Color(0xFFD5DDDF)),
-            onPressed: () => Navigator.push(
+            icon: Icon(Icons.link, color: Color(0xFFB0B8CF)),
+            onPressed: () => _notActual(
               context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      Pair(connectedDevice: _connectedDevice)),
+              '/pair',
+              _connectedDevice == null
+                  ? Pair()
+                  : Pair(connectedDevice: _connectedDevice),
             ),
           ),
           IconButton(
-            icon: Icon(Icons.favorite, color: Color(0xFFD5DDDF),),
+            icon: Icon(Icons.favorite, color: Color(0xFFB0B8CF)),
+            onPressed: () => _notActual(
+              context,
+              '/monitor',
+              _connectedDevice == null
+                  ? Monitor()
+                  : Monitor(connectedDevice: _connectedDevice),
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.settings, color: Color(0xFFB0B8CF)),
             onPressed: () {
               if (_connectedDevice == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -52,25 +75,14 @@ class _BottomState extends State<Bottom> {
                   ),
                 );
                 return;
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          Monitor()), //connectedDevice: _connectedDevice
-                );
               }
+              _notActual(
+                context,
+                '/device',
+                Device(connectedDevice: _connectedDevice),
+              );
             },
           ),
-          IconButton(
-            icon: Icon(Icons.settings, color: Color(0xFFD5DDDF)),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      Device(connectedDevice: _connectedDevice)),
-            ),
-          )
         ],
       ),
     );

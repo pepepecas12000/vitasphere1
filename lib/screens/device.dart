@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:vitasphere1/widgets/profile_btn.dart';
+import '../config/config.dart';
+import '../widgets/profile_btn.dart';
 import '../widgets/bottom.dart';
 import '../db/database.dart';
 
@@ -296,7 +297,18 @@ class _DeviceState extends State<Device> {
         trailing: Switch(
           value: value,
           onChanged: enabled ? onChanged : null,
-          activeColor: const Color(0xFF4D638C),
+          activeColor: mineralGreen,
+          activeTrackColor: mineralGreen.withOpacity(0.5),
+          inactiveThumbColor: blue200,
+          inactiveTrackColor: blue100,
+          trackOutlineColor: WidgetStateProperty.resolveWith<Color?>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
+                return Colors.transparent; // Color del borde cuando está activado
+              }
+              return Colors.transparent; // Color del borde cuando está desactivado
+            },
+          ),
         ),
       ),
     );
@@ -305,17 +317,18 @@ class _DeviceState extends State<Device> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFD5DDDF),
+      backgroundColor: grey,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(
           "Control del dispositivo",
           style: GoogleFonts.quicksand(
+            fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
         ),
-        backgroundColor: const Color(0xFF001D47),
+        backgroundColor: blue500,
         elevation: 0,
         actions: [
           ProfileBtn(),
@@ -331,8 +344,9 @@ class _DeviceState extends State<Device> {
               Text(
                 "Configura el dispositivo según tus necesidades!",
                 style: GoogleFonts.roboto(
-                  fontSize: 18,
-                  color: Color(0xFF1B2727),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: outerSpace,
                 ),
               ),
               const SizedBox(height: 32),
@@ -367,13 +381,33 @@ class _DeviceState extends State<Device> {
                 onChanged: _toggleVibration,
                 enabled: _deviceState,
               ),
-              ElevatedButton(onPressed: (){
-                if (_alarmState){
-                  _toggleAlarm;
-                } else if (!_alarmState){
-                  debugPrint("La alarma se encuentra apagada");
-                }
-              }, child: const Text("Apagar alarma")),
+              Container(
+                alignment: Alignment.center,
+                child:
+                ElevatedButton(
+                  onPressed: () => _toggleAlarm(false),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mineralGreen,
+                    foregroundColor: Colors.white,
+                    elevation: 3,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.alarm_off, size: 24),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Apagar Alarma",
+                        style: GoogleFonts.quicksand(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ),
             ],
           ),
         ),
