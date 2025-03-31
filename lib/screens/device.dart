@@ -331,7 +331,7 @@ class _DeviceState extends State<Device> {
               Text(
                 "Configura el dispositivo según tus necesidades!",
                 style: GoogleFonts.roboto(
-                  fontSize: 18,
+                  fontSize: 16,
                   color: Color(0xFF1B2727),
                 ),
               ),

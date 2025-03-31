@@ -1,32 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:vitasphere1/screens/monitor.dart';
+import '../screens/monitor.dart';
+import '../db/database.dart';
 import 'iniciar.dart';
 
 class Welcome extends StatefulWidget {
-
-  final String? userId;
-
-  const Welcome({super.key, this.userId});
+  const Welcome({super.key});
 
   @override
   State<Welcome> createState() => _WelcomeState();
 }
 
 class _WelcomeState extends State<Welcome> {
-
   String? _userId;
 
-  @override
-  void initState() {
-    super.initState();
-    redirect();
-    _userId = widget.userId;
+  getUser() async {
+    _userId = await MongoDatabase.obtenerUsuarioAct();
+  }
+
+  dbConnect() async {
+    await MongoDatabase.connect();
   }
 
   void redirect() {
     Future.delayed(
-      const Duration(seconds: 3),
+      const Duration(seconds: 2),
       () {
         Navigator.pushReplacement(
           context,
@@ -36,6 +34,14 @@ class _WelcomeState extends State<Welcome> {
         );
       },
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUser();
+    dbConnect();
+    redirect();
   }
 
   @override
@@ -86,21 +92,6 @@ class _WelcomeState extends State<Welcome> {
                   textAlign: TextAlign.center,
                 ),
               ),
-
-              // Indicador de carga
-              /*
-              const SizedBox(height: 60),
-              SizedBox(
-                width: 40,
-                height: 40,
-                child: CircularProgressIndicator(
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    Color.fromRGBO(255, 255, 255, 0.7),
-                  ),
-                  strokeWidth: 3,
-                ),
-              ),
-              */
             ],
           ),
         ),

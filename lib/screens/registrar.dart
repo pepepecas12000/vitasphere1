@@ -201,7 +201,7 @@ class _RegistrarState extends State<Registrar> {
                           ? const CircularProgressIndicator(color: Color(0xFFD5DDDF))
                           : const Text(
                         "Registrarse",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFD5DDDF)),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                     ),
                   ),

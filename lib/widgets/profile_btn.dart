@@ -8,8 +8,7 @@ class ProfileBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
-        icon: const Icon(Icons.account_circle),
-        color: Color(0xFFB0B8CF),
+        icon: const Icon(Icons.account_circle, color: Colors.white),
         onSelected: (String value) {
           if (value == "l") MongoDatabase.cerrarSesion();
           Navigator.push(
