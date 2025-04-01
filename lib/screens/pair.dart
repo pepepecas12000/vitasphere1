@@ -38,7 +38,7 @@ class _PairState extends State<Pair> {
         _adapterState = state;
       });
 
-      if (state == BluetoothAdapterState.on) {
+      if (state == BluetoothAdapterState.on && _connectedDevice==null) {
         _startScan();
       } else {
         _stopScan();
@@ -239,7 +239,7 @@ class _PairState extends State<Pair> {
                   subtitle: Text(
                     isConnected ? "Conectado" : "Disponible",
                     style: GoogleFonts.roboto(
-                      fontSize: 14,
+                      fontSize: 16,
                       color: isConnected ? outerSpace : blue500,
                     ),
                   ),
@@ -298,7 +298,6 @@ class _PairState extends State<Pair> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Section
             Container(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -307,7 +306,7 @@ class _PairState extends State<Pair> {
                   Text(
                     "Conecta tu VitaSphere e inicia tu tranquilidad!",
                     style: GoogleFonts.roboto(
-                      fontSize: 16,
+                      fontSize: 18,
                       color: outerSpace,
                       fontWeight: FontWeight.w500,
                     ),
@@ -363,8 +362,8 @@ class _PairState extends State<Pair> {
                               ? 'Activado'
                               : 'Desactivado',
                           style: GoogleFonts.roboto(
-                            fontSize: 14,
-                            color: blue200,
+                            fontSize: 16,
+                            color: mineralGreen,
                           ),
                         ),
                       ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../screens/monitor.dart';
+import '../screens/pair.dart';
 import '../db/database.dart';
 import 'iniciar.dart';
 
@@ -13,6 +13,10 @@ class Welcome extends StatefulWidget {
 
 class _WelcomeState extends State<Welcome> {
   String? _userId;
+
+  init() async {
+    WidgetsFlutterBinding.ensureInitialized();
+  }
 
   getUser() async {
     _userId = await MongoDatabase.obtenerUsuarioAct();
@@ -29,7 +33,7 @@ class _WelcomeState extends State<Welcome> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => _userId != null ? Monitor() : const Iniciar(),
+            builder: (context) => _userId != null ? Pair() : const Iniciar(),
           ),
         );
       },
@@ -38,10 +42,11 @@ class _WelcomeState extends State<Welcome> {
 
   @override
   void initState() {
-    super.initState();
+    init();
     getUser();
     dbConnect();
     redirect();
+    super.initState();
   }
 
   @override
