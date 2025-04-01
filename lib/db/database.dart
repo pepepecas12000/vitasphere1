@@ -4,12 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
 class MongoDatabase {
   static late Db db;
   static late DbCollection collection;
-  static late DbCollection Registros;
+  static late DbCollection registers;
   static bool isConnected = false;
   static bool isConnected2 = false;
 
@@ -21,29 +19,29 @@ class MongoDatabase {
   static const String SECRET_KEY = "vita";
 
   static Future<void> connect() async {
-    if (isConnected) return;
-    try {
-      db = await Db.create(MONGO_URL);
-      await db.open();
-      collection = db.collection(COLLECTION_NAME);
-      isConnected = true;
-      debugPrint("Conexión exitosa a MongoDB Atlas: Usuarios");
 
+    if (isConnected && isConnected2) return;
 
-    } catch (e) {
-      debugPrint("Error en la conexión a MongoDB: $e");
+    while (!isConnected || !isConnected2) {
+      try {
+        db = await Db.create(MONGO_URL);
+        await db.open();
+        collection = db.collection(COLLECTION_NAME);
+        isConnected = true;
+        debugPrint("Conexión exitosa a Usuarios");
+      } catch (e) {
+        debugPrint("Error en la conexión: $e");
+      }
+      try {
+        db = await Db.create(MONGO_URL);
+        await db.open();
+        registers = db.collection(COLLECTION_METRIC);
+        isConnected2 = true;
+        debugPrint("Conexión exitosa a Registros");
+      } catch (e) {
+        debugPrint("Error en la conexión: $e");
+      }
     }
-    try {
-      db = await Db.create(MONGO_URL);
-      await db.open();
-      Registros = db.collection(COLLECTION_METRIC);
-      isConnected2 = true;
-      debugPrint("✅ Conexión exitosa a MongoDB Atlas: Registros");
-    } catch (e) {
-      print("❌ Error en la conexión a MongoDB: $e");
-    }
-
-
   }
 
   // Encriptar contraseña con HMAC-SHA256
@@ -172,18 +170,17 @@ class MongoDatabase {
 
   static Future<String?> obtenerUsuarioAct() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString("user_id");
+    String? user =  prefs.getString("user_id");
+    if (user == null) {
+      debugPrint("El usuario es nulo");
+    }
+    return user;
   }
 
   static Future<void> ligarDispositivo(String deviceName) async {
     String? appUser = await obtenerUsuarioAct();
 
-    if (appUser == null) {
-      debugPrint("El usuario es nulo");
-      return;
-    }
-
-    var objectId = ObjectId.parse(appUser);
+    var objectId = ObjectId.parse(appUser!);
 
     var result = await collection.updateOne(
       {
@@ -202,7 +199,7 @@ class MongoDatabase {
       var existing = await collection.findOne({
         "_id": objectId,
         "dispositivos": {
-          "\$elemMatch": { "modelo": deviceName, "estado": "activo" }
+          "\$elemMatch": {"modelo": deviceName, "estado": "activo"}
         }
       });
 
@@ -212,7 +209,7 @@ class MongoDatabase {
           {"_id": objectId},
           {
             "\$push": {
-              "dispositivos": { "modelo": deviceName, "estado": "activo" }
+              "dispositivos": {"modelo": deviceName, "estado": "activo"}
             }
           },
         );
@@ -224,36 +221,42 @@ class MongoDatabase {
       debugPrint("Dispositivo actualizado.");
     }
   }
-  
-  static Future<String> obtenerNombre()async{
+
+  static Future<String> obtenerNombre() async {
     String? id = await obtenerUsuarioAct();
     String? nombre;
-    Map<String,dynamic?>? datusu;
-    debugPrint("el id del usuario es el de: $id");
+    Map<String, dynamic>? datusu;
     try {
-
       ObjectId lol = ObjectId.parse(id!);
-      debugPrint(lol.toString());
-
-       datusu = await collection.findOne({"_id": lol});
-       debugPrint(" esta es la cantidad $datusu?.length");
-     nombre=datusu?["nombre"];
-     debugPrint(" el nombre del cliente es $nombre");
-    }catch(e){
-      debugPrint("No se encontro el nombre: $e");
+      datusu = await collection.findOne({"_id": lol});
+      nombre = datusu?["nombre"];
+    } catch (e) {
+      debugPrint("No se encontró el nombre: $e");
     }
-    return nombre ?? "no";
+    return nombre ?? "Usuario";
   }
 
-  static Future<Stream<Map<String, dynamic>>?> ultmetrica() async {
+  static Future<Map<String, dynamic>?> ultmetrica() async {
     try {
-      var ultimaMetrica = await Registros.modernFind(filter:
-      {"tipo": "Metricas"},sort: {"_id": -1}, limit:1 // Ordenar por _id en orden descendente (el más reciente primero)
+      String? appUser = await obtenerUsuarioAct();
+      var objectId = ObjectId.parse(appUser!);
+
+      await connect();
+      var ultimaMetrica = registers.modernFind(
+        filter: {"tipo": "Metricas", "id_user": objectId},
+        sort: {"_id": -1},
+        limit: 1,
+      );
+      var caidas = registers.modernFind(
+        filter: {"tipo": "Alerta", "categoria": "caida", "id_user": objectId},
       );
 
-      return ultimaMetrica;
+      Map<String, dynamic> resultado = await ultimaMetrica.first;
+      resultado["caidas"] = caidas.length;
+
+      return resultado;
     } catch (e) {
-      print("❌ Error al obtener la última métrica: $e");
+      debugPrint("Error al obtener la última métrica y caídas: $e");
       return null;
     }
   }

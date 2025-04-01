@@ -69,7 +69,7 @@ class _BottomState extends State<Bottom> {
                   SnackBar(
                     content: Text(
                       "No hay ningún dispositivo conectado",
-                      style: const TextStyle(color: Color(0xFFB0B8CF)),
+                      style: const TextStyle(color: Color(0xFFB0B8CF), fontSize: 18),
                     ),
                     backgroundColor: Color(0xFF4D638C),
                   ),

@@ -291,7 +291,7 @@ class _DeviceState extends State<Device> {
         subtitle: Text(
           subtitle,
           style: GoogleFonts.quicksand(
-            fontSize: 12,
+            fontSize: 14,
           ),
         ),
         trailing: Switch(
@@ -304,9 +304,9 @@ class _DeviceState extends State<Device> {
           trackOutlineColor: WidgetStateProperty.resolveWith<Color?>(
             (Set<WidgetState> states) {
               if (states.contains(WidgetState.selected)) {
-                return Colors.transparent; // Color del borde cuando está activado
+                return Colors.transparent;
               }
-              return Colors.transparent; // Color del borde cuando está desactivado
+              return Colors.transparent;
             },
           ),
         ),
@@ -344,7 +344,7 @@ class _DeviceState extends State<Device> {
               Text(
                 "Configura el dispositivo según tus necesidades!",
                 style: GoogleFonts.roboto(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.w500,
                   color: outerSpace,
                 ),
@@ -382,32 +382,31 @@ class _DeviceState extends State<Device> {
                 enabled: _deviceState,
               ),
               Container(
-                alignment: Alignment.center,
-                child:
-                ElevatedButton(
-                  onPressed: () => _toggleAlarm(false),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: mineralGreen,
-                    foregroundColor: Colors.white,
-                    elevation: 3,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.alarm_off, size: 24),
-                      const SizedBox(width: 8),
-                      Text(
-                        "Apagar Alarma",
-                        style: GoogleFonts.quicksand(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                  alignment: Alignment.center,
+                  child: ElevatedButton(
+                    onPressed: () => _toggleAlarm(!_alarmState),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: mineralGreen,
+                      foregroundColor: Colors.white,
+                      elevation: 3,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.alarm_off, size: 24),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Apagar Alarma",
+                          style: GoogleFonts.quicksand(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                )
-              ),
+                      ],
+                    ),
+                  )),
             ],
           ),
         ),
