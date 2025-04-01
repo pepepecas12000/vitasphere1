@@ -243,12 +243,12 @@ class MongoDatabase {
 
       await connect();
       var ultimaMetrica = registers.modernFind(
-        filter: {"tipo": "Metricas", "id_user": objectId},
+        filter: {"tipo": "Metricas", "id_user": appUser},
         sort: {"_id": -1},
         limit: 1,
       );
       var caidas = registers.modernFind(
-        filter: {"tipo": "Alerta", "categoria": "caida", "id_user": objectId},
+        filter: {"tipo": "Alerta", "categoria": "caida", "id_user": appUser},
       );
 
       Map<String, dynamic> resultado = await ultimaMetrica.first;
